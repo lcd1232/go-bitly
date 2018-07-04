@@ -25,12 +25,17 @@ type Client struct {
 	BaseURL     string
 	UserAgent   string
 	Debug       bool
+	Groups      GroupsService
 }
 
 func NewClient(credentials Credentials) *Client {
-	return &Client{
+	c := &Client{
 		Credentials: credentials,
+		HttpClient:  &http.Client{},
 	}
+	c.UserAgent = defaultUserAgent
+	c.Groups = &GroupsClient{client: c}
+	return c
 }
 
 func (c *Client) NewRequest(method, path string, payload interface{}) (*http.Request, error) {
@@ -90,11 +95,28 @@ func (c *Client) Do(req *http.Request, obj interface{}) (*http.Response, error) 
 	return resp, err
 }
 
+type ErrorResponse struct {
+	response *http.Response
+	Message  string `json:"message"`
+}
+
+func (r *ErrorResponse) Error() string {
+	return fmt.Sprintf("%v %v: %v %v",
+		r.response.Request.Method, r.response.Request.URL,
+		r.response.StatusCode, r.Message)
+}
+
 func CheckResponse(resp *http.Response) error {
 	if code := resp.StatusCode; 200 <= code && code <= 299 {
 		return nil
 	}
-	return nil
+
+	errorResponse := &ErrorResponse{}
+	errorResponse.response = resp
+	if err := json.NewDecoder(resp.Body).Decode(errorResponse); err != nil {
+		return err
+	}
+	return errorResponse
 }
 
 func (c *Client) get(path string, obj interface{}) (*http.Response, error) {

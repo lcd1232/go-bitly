@@ -2,7 +2,11 @@ package bitly
 
 import "fmt"
 
-type GroupsService struct {
+type GroupsService interface {
+	ListGroups(string) (*groupsResponse, error)
+}
+
+type GroupsClient struct {
 	client *Client
 }
 
@@ -30,11 +34,14 @@ type groupsResponse struct {
 	Groups []groupResponse `json:"groups"`
 }
 
-func (s *GroupsService) ListGroups(OrganizationGUID string) (*groupsResponse, error) {
+func (s *GroupsClient) ListGroups(OrganizationGUID string) (*groupsResponse, error) {
 	path := versioned(groupPath(""))
-	groupsResponse := groupsResponse{}
+	groupsResponse := &groupsResponse{}
 
-	//path, err :=
+	_, err := s.client.get(path, groupsResponse)
+	if err != nil {
+		return nil, err
+	}
 
-	s.client.get(path, groupsResponse)
+	return groupsResponse, nil
 }
