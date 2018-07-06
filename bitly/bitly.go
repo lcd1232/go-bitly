@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/form"
 	"io"
 	"log"
 	"net/http"
@@ -17,6 +18,10 @@ const (
 	defaultUserAgent = "go-bitly/" + Version
 
 	apiVersion = "v4"
+)
+
+var (
+	encoder = form.NewEncoder()
 )
 
 type Client struct {
@@ -95,9 +100,18 @@ func (c *Client) Do(req *http.Request, obj interface{}) (*http.Response, error) 
 	return resp, err
 }
 
+type ErrorJSON struct {
+	Field     string `json:"field"`
+	Message   string `json:"message"`
+	ErrorCode string `json:"error_code"`
+}
+
 type ErrorResponse struct {
-	response *http.Response
-	Message  string `json:"message"`
+	response    *http.Response
+	Message     string      `json:"message"`
+	Errors      []ErrorJSON `json:"errors"`
+	Resource    string      `json:"resource"`
+	Description string      `json:"description"`
 }
 
 func (r *ErrorResponse) Error() string {

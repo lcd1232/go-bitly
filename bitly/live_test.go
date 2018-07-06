@@ -3,6 +3,7 @@ package bitly
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -16,7 +17,7 @@ var (
 func init() {
 	bitlyToken = os.Getenv("BITLY_TOKEN")
 	bitlyBaseURL = os.Getenv("BITLY_BASE_URL")
-	_, bitlyDebug := os.LookupEnv("BITLY_DEBUG")
+	bitlyDebug := strings.ToUpper(os.Getenv("BITLY_DEBUG")) == "TRUE"
 	if bitlyBaseURL == "" {
 		bitlyBaseURL = defaultBaseURL
 	}
@@ -35,12 +36,17 @@ func TestLive_ListGroups(t *testing.T) {
 		t.Skip("skipping live test")
 	}
 
-	groupsResponse, err := bitlyClient.Groups.ListGroups("")
+	groupsResp, err := bitlyClient.Groups.ListGroups("")
 	if err != nil {
 		t.Fatalf("Live Groups.ListGroups() returned error: %v", err)
 	}
-	for _, group := range groupsResponse.Groups {
+	for _, group := range groupsResp.Groups {
 		t.Logf("GUID: %v\n", group.GUID)
 		t.Logf("Organization GUID: %v\n", group.OrganizationGUID)
+		groupResp, err := bitlyClient.Groups.GetGroup(group.GUID)
+		if err != nil {
+			t.Fatalf("Live Groups.GetGroup(%v) returned error: %v", group.GUID, err)
+		}
+		t.Logf("Group %v is active: %v\n", groupResp.GUID, groupResp.IsActive)
 	}
 }
