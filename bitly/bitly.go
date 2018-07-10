@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/form"
 	"io"
 	"log"
 	"net/http"
@@ -18,10 +17,6 @@ const (
 	defaultUserAgent = "go-bitly/" + Version
 
 	apiVersion = "v4"
-)
-
-var (
-	encoder = form.NewEncoder()
 )
 
 type Client struct {
