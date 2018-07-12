@@ -128,49 +128,33 @@ func CheckResponse(resp *http.Response) error {
 	return errorResponse
 }
 
-func (c *Client) get(path string, obj interface{}) (*http.Response, error) {
-	req, err := c.NewRequest("GET", path, nil)
+func (c *Client) sendRequest(path string, payload, obj interface{}, method string) (*http.Response, error) {
+	req, err := c.NewRequest(method, path, payload)
 	if err != nil {
 		return nil, err
 	}
 
 	return c.Do(req, obj)
+}
+
+func (c *Client) get(path string, obj interface{}) (*http.Response, error) {
+	return c.sendRequest(path, nil, obj, "GET")
 }
 
 func (c *Client) post(path string, payload, obj interface{}) (*http.Response, error) {
-	req, err := c.NewRequest("POST", path, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.Do(req, obj)
+	return c.sendRequest(path, payload, obj, "POST")
 }
 
 func (c *Client) put(path string, payload, obj interface{}) (*http.Response, error) {
-	req, err := c.NewRequest("PUT", path, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.Do(req, obj)
+	return c.sendRequest(path, payload, obj, "PUT")
 }
 
 func (c *Client) patch(path string, payload, obj interface{}) (*http.Response, error) {
-	req, err := c.NewRequest("PATCH", path, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.Do(req, obj)
+	return c.sendRequest(path, payload, obj, "PATCH")
 }
 
 func (c *Client) delete(path string, payload interface{}, obj interface{}) (*http.Response, error) {
-	req, err := c.NewRequest("DELETE", path, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.Do(req, obj)
+	return c.sendRequest(path, payload, obj, "DELETE")
 }
 
 func versioned(path string) string {
