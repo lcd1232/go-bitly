@@ -21,19 +21,15 @@ const (
 )
 
 type Client struct {
-	HttpClient  *http.Client
-	Credentials Credentials
-	BaseURL     string
-	UserAgent   string
-	Debug       bool
-	Groups      GroupsService
+	httpClient *http.Client
+	BaseURL    string
+	UserAgent  string
+	Debug      bool
+	Groups     GroupsService
 }
 
-func NewClient(credentials Credentials) *Client {
-	c := &Client{
-		Credentials: credentials,
-		HttpClient:  &http.Client{},
-	}
+func NewClient(httpClient *http.Client) *Client {
+	c := &Client{httpClient: httpClient, BaseURL: defaultBaseURL}
 	c.UserAgent = defaultUserAgent
 	c.Groups = &GroupsClient{client: c}
 	return c
@@ -57,9 +53,6 @@ func (c *Client) NewRequest(method, path string, payload interface{}) (*http.Req
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", c.UserAgent)
-	for key, value := range c.Credentials.Headers() {
-		req.Header.Add(key, value)
-	}
 
 	return req, nil
 }
@@ -68,7 +61,7 @@ func (c *Client) Do(req *http.Request, obj interface{}) (*http.Response, error) 
 	if c.Debug {
 		log.Printf("Executing request (%v): %#v", req.URL, req)
 	}
-	resp, err := c.HttpClient.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,9 @@
 package bitly
 
 import (
+	"context"
 	"fmt"
+	"golang.org/x/oauth2"
 	"os"
 	"strings"
 	"testing"
@@ -23,8 +25,9 @@ func init() {
 	}
 
 	if len(bitlyToken) > 0 {
-		bitlyLiveTest = true
-		bitlyClient = NewClient(NewOauthTokenCredentials(bitlyToken))
+		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: bitlyToken})
+		tc := oauth2.NewClient(context.Background(), ts)
+		bitlyClient = NewClient(tc)
 		bitlyClient.BaseURL = bitlyBaseURL
 		bitlyClient.UserAgent = fmt.Sprintf("%v +livetest", bitlyClient.UserAgent)
 		bitlyClient.Debug = bitlyDebug

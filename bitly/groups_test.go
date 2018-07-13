@@ -87,7 +87,7 @@ func TestGroupsClient_ListGroups(t *testing.T) {
 			}))
 			defer s.Close()
 
-			c := NewClient(NewOauthTokenCredentials("bitly-token"))
+			c := NewClient(http.DefaultClient)
 			c.BaseURL = s.URL
 
 			got, err := c.Groups.ListGroups(tc.organizationGUID)
@@ -118,12 +118,42 @@ func TestGroupsClient_GetBitlinksByGroup(t *testing.T) {
 		{
 			desc:         "ok response",
 			responseCode: http.StatusOK,
-			responseBody: `{"links":[{"created_at":"2012-12-18T18:16:46+0000","id":"bit.ly/F3zBa5","link":"http://bit.ly/F3zBa5","custom_bitlinks":[],"long_url":"http://example.com/","title":"Example.com Main Page","archived":false,"created_by":"test","client_id":"36b72d37f23e9e247e0aa40083841c92163c5c2f","tags":[],"deeplinks":[],"references":{"group":"https://api-ssl.bitly.com/v4/groups/BcciiJsSgCZ"}},{"created_at":"2012-12-18T18:15:00+0000","id":"on.natgeo.com/WmsHnP","link":"http://on.natgeo.com/WmsHnP","custom_bitlinks":[],"long_url":"http://animals.nationalgeographic.com/animals/fish/pufferfish/","title":"All about Pufferfish","archived":false,"created_by":"lcd1232","client_id":"36b72d37f23e9e247e0aa39983841c92163c5c2f","tags":[],"deeplinks":[],"references":{"group":"https://api-ssl.bitly.com/v4/groups/BcciiJcGgDF"}}],"pagination":{"prev":"","next":"","size":50,"page":1,"total":2}}`,
+			responseBody: `{"links":[{"created_at":"2012-12-18T20:16:46+0000","id":"bit.ly/F3zBa5","link":"http://bit.ly/F3zBa5","custom_bitlinks":[],"long_url":"http://example.com/","title":"Example.com Main Page","archived":false,"created_by":"test","client_id":"36b72d37f23e9e247e0aa40083841c92163c5c2f","tags":[],"deeplinks":[],"references":{"group":"https://api-ssl.bitly.com/v4/groups/BcciiJsSgCZ"}},{"created_at":"2012-12-18T18:15:00+0000","id":"on.natgeo.com/WmsHnP","link":"http://on.natgeo.com/WmsHnP","custom_bitlinks":[],"long_url":"http://animals.nationalgeographic.com/animals/fish/pufferfish/","title":"All about Pufferfish","archived":false,"created_by":"test","client_id":"36b72d37f23e9e247e0aa40083841c92163c5c2f","tags":[],"deeplinks":[],"references":{"group":"https://api-ssl.bitly.com/v4/groups/BcciiJsSgCZ"}}],"pagination":{"prev":"","next":"","size":50,"page":1,"total":2}}`,
 			groupGUID:    "BcciiJcGgDF",
 			queryParams:  nil,
 			wantURL:      "/v4/groups/BcciiJcGgDF/bitlinks",
 			wantErr:      "",
-			wantResult:   nil,
+			wantResult: &getBitlinksByGroupResponse{
+				Pagination: Paginate{
+					Total: 2,
+					Size:  50,
+					Prev:  "",
+					Page:  1,
+					Next:  "",
+				},
+				Links: []linkResponse{
+					{
+						References: map[string]string{"group": "https://api-ssl.bitly.com/v4/groups/BcciiJsSgCZ"},
+						Archived:   false,
+						Tags:       []string{},
+						CreatedAt:  "2012-12-18T20:16:46+0000",
+						CreatedBy:  "test",
+						Title:      "Example.com Main Page",
+						LongURL:    "http://example.com/",
+						ClientID:   "36b72d37f23e9e247e0aa40083841c92163c5c2f",
+					},
+					{
+						References: map[string]string{"group": "https://api-ssl.bitly.com/v4/groups/BcciiJsSgCZ"},
+						Archived:   false,
+						Tags:       []string{},
+						CreatedAt:  "2012-12-18T18:15:00+0000",
+						CreatedBy:  "test",
+						Title:      "All about Pufferfish",
+						LongURL:    "http://animals.nationalgeographic.com/animals/fish/pufferfish/",
+						ClientID:   "36b72d37f23e9e247e0aa40083841c92163c5c2f",
+					},
+				},
+			},
 		},
 	}
 	for _, tc := range testCases {
@@ -140,7 +170,7 @@ func TestGroupsClient_GetBitlinksByGroup(t *testing.T) {
 			}))
 			defer s.Close()
 
-			c := NewClient(NewOauthTokenCredentials("bitly-token"))
+			c := NewClient(http.DefaultClient)
 			c.BaseURL = s.URL
 
 			got, err := c.Groups.GetBitlinksByGroup(tc.groupGUID, tc.queryParams)

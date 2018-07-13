@@ -189,12 +189,12 @@ func (gc *GroupsClient) GetBitlinksByGroup(GroupGUID string, queryParams *GetBit
 		if err != nil {
 			return nil, err
 		}
-		path, err = buildURL(versioned(GroupGUID)+"/bitlinks", q)
+		path, err = buildURL(versioned(groupPath(GroupGUID)+"/bitlinks"), q)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		path = versioned(GroupGUID) + "/bitlinks"
+		path = versioned(groupPath(GroupGUID) + "/bitlinks")
 	}
 	_, err := gc.client.get(path, getBitlinksByGroupResp)
 	if err != nil {
