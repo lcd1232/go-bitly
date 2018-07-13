@@ -10,6 +10,7 @@ type GroupsService interface {
 	ListGroups(string) (*groupsResponse, error)
 	GetGroup(string) (*groupResponse, error)
 	GetGroupPreferences(string) (*groupPrefResponse, error)
+	GetBitlinksByGroup(GroupGUID string, queryParams *GetBitlinksByGroupQueryParams) (*getBitlinksByGroupResponse, error)
 }
 
 type GroupsClient struct {
@@ -55,6 +56,39 @@ type linkResponse struct {
 	DeepLinks  []deepLink        `json:"deep_links"`
 	LongURL    string            `json:"long_url"`
 	ClientID   string            `json:"client_id"`
+}
+
+type getBitlinksByGroupObject struct {
+	url      string
+	Resp     *getBitlinksByGroupResponse
+	isLoaded bool
+	client   *Client
+}
+
+func (o *getBitlinksByGroupObject) Next() bool {
+	if nextURL := o.Resp.Pagination.Next; nextURL != "" {
+		o.url = nextURL
+		o.isLoaded = false
+		return true
+	}
+	return false
+}
+
+func (o *getBitlinksByGroupObject) Prev() bool {
+	if prevURL := o.Resp.Pagination.Prev; prevURL != "" {
+		o.url = prevURL
+		o.isLoaded = false
+		return true
+	}
+	return false
+}
+
+func (o *getBitlinksByGroupObject) Get() error {
+	if o.isLoaded {
+		return nil
+	}
+	_, err := o.client.get(o.url, o.Resp)
+	return err
 }
 
 type getBitlinksByGroupResponse struct {

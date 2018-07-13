@@ -34,6 +34,13 @@ func TestBuildURL(t *testing.T) {
 			wantResult: "http://example.com/path/to/random/place?force=true&sort=desc",
 			wantError:  "",
 		},
+		{
+			desc:       "empty params",
+			url:        "http://example.com/path",
+			params:     url.Values{},
+			wantResult: "http://example.com/path",
+			wantError:  "",
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {

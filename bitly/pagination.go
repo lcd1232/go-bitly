@@ -5,10 +5,13 @@ type Paginate struct {
 	Size  int    `json:"size"`
 	Prev  string `json:"prev"`
 	Page  int    `json:"page"`
-	Next  int    `json:"next"`
+	Next  string `json:"next"`
 }
 
+// Paginator is a simple interface which need for pagination
+//
 type Paginator interface {
-	Next() error
-	Prev() error
+	Next() bool
+	Prev() bool
+	Get() error
 }
