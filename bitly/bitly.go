@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -20,18 +21,24 @@ const (
 	apiVersion = "v4"
 )
 
+var (
+	errOptionsRequired = errors.New("options cannot be empty")
+)
+
 type Client struct {
 	httpClient *http.Client
 	BaseURL    string
 	UserAgent  string
 	Debug      bool
 	Groups     GroupsService
+	User	   UserService
 }
 
 func NewClient(httpClient *http.Client) *Client {
 	c := &Client{httpClient: httpClient, BaseURL: defaultBaseURL}
 	c.UserAgent = defaultUserAgent
 	c.Groups = &GroupsClient{client: c}
+	c.User = &UserClient{client: c}
 	return c
 }
 
@@ -90,6 +97,14 @@ func (c *Client) Do(req *http.Request, obj interface{}) (*http.Response, error) 
 	}
 
 	return resp, err
+}
+
+type errorParameter struct {
+	paramName string
+}
+
+func (e *errorParameter) Error() string {
+	return fmt.Sprintf("%s paramater is required and cannot be empty", e.paramName)
 }
 
 type ErrorJSON struct {

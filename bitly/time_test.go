@@ -2,7 +2,6 @@ package bitly
 
 import (
 	"encoding/json"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -25,16 +24,16 @@ func TestJSONDate_UnmarshalJSON(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			var jsonDate = new(JSONDate)
-			err := json.Unmarshal(tc.rawJSON, jsonDate)
+			jsonDate := JSONDate{}
+			err := json.Unmarshal(tc.rawJSON, &jsonDate)
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if tc.wantErr != "" && (err == nil || !strings.Contains(err.Error(), tc.wantErr)) {
 				t.Fatalf("want error %v got %v", tc.wantErr, err)
 			}
-			if !reflect.DeepEqual(tc.wantTime, jsonDate) {
-				t.Fatalf("want group %#v got %#v", tc.wantTime, jsonDate)
+			if !time.Time(tc.wantTime).Equal(time.Time(jsonDate)) {
+				t.Fatalf("want time %#v got %#v", tc.wantTime, jsonDate)
 			}
 		})
 	}
