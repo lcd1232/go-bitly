@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -31,7 +31,7 @@ type Client struct {
 	UserAgent  string
 	Debug      bool
 	Groups     GroupsService
-	User	   UserService
+	User       UserService
 }
 
 func NewClient(httpClient *http.Client) *Client {
@@ -72,10 +72,7 @@ func (c *Client) Do(req *http.Request, obj interface{}) (*http.Response, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		io.Copy(ioutil.Discard, resp.Body)
-		resp.Body.Close()
-	}()
+	defer resp.Body.Close()
 
 	if c.Debug {
 		log.Printf("Response received: %#v", resp)
